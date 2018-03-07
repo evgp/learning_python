@@ -1,7 +1,7 @@
 import socket
 
 
-with socket.create_connection(("127.0.0.1", 10001), 5) as sock:
+with socket.create_connection(("127.0.0.1", 10001), 5) as sock: # 5- connect timeout dedicated to connection establishing
     #set socket read timeout
     sock.settimeout(2)
     try:
