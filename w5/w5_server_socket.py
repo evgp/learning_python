@@ -1,4 +1,4 @@
-import socket, threading
+import socket, threading, multiprocess
 
 
 def process_request(conn, addr):
@@ -9,6 +9,7 @@ def process_request(conn, addr):
             if not data:
                 break
             print(data.decode("utf8"))
+            
 
 with socket.socket() as sock:
     sock.bind(("", 10001))
