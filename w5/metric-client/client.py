@@ -16,12 +16,12 @@ class Client:
         self.sock.close
 
     def put(self, key, value, timestamp=datetime.datetime.now().timestamp()):
-        self.timestamp = timestamp  # or datetime.datetime.now().timestamp()
+        self.timestamp = timestamp
         try:
             data_send = f"put {key} {value} {self.timestamp}\n"
             self.sock.sendall(data_send.encode("utf-8"))
-            # if self.sock.recv(1024) == "error\nwrong command\n\n":
-            #     raise ClientError()
+            if self.sock.recv(1024).decode("utf-8") == "error\nwrong command\n\n":
+                raise ClientError()
         except:
             raise ClientError
 
