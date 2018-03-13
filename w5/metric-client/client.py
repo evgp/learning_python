@@ -23,9 +23,9 @@ class Client:
             raise ClientError("Error getting data from server")
         for answ in srv_answer:
             answ = answ.split()
-            if len(answ) > 1:
+            if len(answ) > 2:
                 result.setdefault(answ[0], [])
-                result[answ[0]].append((answ[2], answ[1]))
+                result[answ[0]].append((int(answ[2]), float(answ[1])))              
         return result
 
     def put(self, key, value, timestamp=datetime.datetime.now().timestamp()):
@@ -42,11 +42,14 @@ class Client:
         try:
             data_send = f"get {key}\n"
             self.sock.sendall(data_send.encode("utf-8"))
+            a = self.sock.recv(1024).decode("utf-8").splitlines()
+            if a[0] != "ok":
+                raise ClientError
             return self.parse_get(self.sock.recv(1024))
         except ClientError as err:
             return err.method
 
 
 class ClientError(Exception):
-    def __init__(self, method):
-        self.method = method
+    def __init__(self, *args):
+        self.method = ""
