@@ -9,20 +9,30 @@ class Client:
         self.port = port
         try:
             self.sock = socket.create_connection((self.addr, self.port))
-        except:
-            pass
+        except OSError as err:
+            raise ClientError("create_connection: can't establish connection")
 
     def __del__(self):
         self.sock.close
 
     @staticmethod
     def parse_get(got_string):
-        pass
+        result = {}
+        srv_answer = got_string.decode("utf-8").splitlines()
+        if (srv_answer[0] != "ok"):
+            raise ClientError("Error getting data from server")
+        for answ in srv_answer:
+            answ = answ.split()
+            if len(answ) > 1:
+                result.setdefault(answ[0], [])
+                result[answ[0]].append((answ[2], answ[1]))
+        return result
 
-    def put(self, key, value, timestamp):
-        self.timestamp = timestamp or datetime.datetime.now().timestamp()
+    def put(self, key, value, timestamp=datetime.datetime.now().timestamp()):
+        self.timestamp = timestamp  # or datetime.datetime.now().timestamp()
         try:
-            self.sock.sendall(f"put {key} {value} {self.timestamp}\n")
+            data_send = f"put {key} {value} {self.timestamp}\n"
+            self.sock.sendall(data_send.encode("utf-8"))
             if self.sock.recv(1024) == "error\nwrong command\n\n":
                 raise ClientError("put")
         except ClientError as err:
@@ -30,7 +40,9 @@ class Client:
 
     def get(self, key):
         try:
-            pass
+            data_send = f"get {key}\n"
+            self.sock.sendall(data_send.encode("utf-8"))
+            return self.parse_get(self.sock.recv(1024))
         except ClientError as err:
             return err.method
 
