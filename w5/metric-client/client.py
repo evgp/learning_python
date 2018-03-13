@@ -9,24 +9,27 @@ class Client:
         self.port = port
         try:
             self.sock = socket.create_connection((self.addr, self.port))
-        except OSError as err:
-            raise ClientError("create_connection: can't establish connection")
+        except:
+            raise ClientError
 
     def __del__(self):
         self.sock.close
 
     @staticmethod
     def parse_get(got_string):
-        result = {}
-        srv_answer = got_string.decode("utf-8").splitlines()
-        if (srv_answer[0] != "ok"):
-            raise ClientError("Error getting data from server")
-        for answ in srv_answer:
-            answ = answ.split()
-            if len(answ) > 2:
-                result.setdefault(answ[0], [])
-                result[answ[0]].append((int(answ[2]), float(answ[1])))              
-        return result
+        try:
+            result = {}
+            srv_answer = got_string.decode("utf-8").splitlines()
+            if (srv_answer[0] != "ok"):
+                raise ClientError("Error getting data from server")
+            for answ in srv_answer:
+                answ = answ.split()
+                if len(answ) > 2:
+                    result.setdefault(answ[0], [])
+                    result[answ[0]].append((int(answ[2]), float(answ[1])))              
+            return result
+        except:
+            raise ClientError
 
     def put(self, key, value, timestamp=datetime.datetime.now().timestamp()):
         self.timestamp = timestamp  # or datetime.datetime.now().timestamp()
@@ -35,8 +38,8 @@ class Client:
             self.sock.sendall(data_send.encode("utf-8"))
             if self.sock.recv(1024) == "error\nwrong command\n\n":
                 raise ClientError("put")
-        except ClientError as err:
-            return err.method
+        except:
+            raise ClientError
 
     def get(self, key):
         try:
@@ -44,10 +47,10 @@ class Client:
             self.sock.sendall(data_send.encode("utf-8"))
             a = self.sock.recv(1024).decode("utf-8").splitlines()
             if a[0] != "ok":
-                raise ClientError
+                raise ClientError()
             return self.parse_get(self.sock.recv(1024))
-        except ClientError as err:
-            return err.method
+        except:
+            raise ClientError
 
 
 class ClientError(Exception):
