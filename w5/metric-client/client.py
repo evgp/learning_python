@@ -10,7 +10,7 @@ class Client:
         try:
             self.sock = socket.create_connection((self.addr, self.port))
         except:
-            raise ClientError
+            raise ClientError()
 
     def __del__(self):
         self.sock.close
@@ -21,7 +21,7 @@ class Client:
             result = {}
             srv_answer = got_string.decode("utf-8").splitlines()
             if (srv_answer[0] != "ok"):
-                raise ClientError("Error getting data from server")
+                raise ClientError()
             for answ in srv_answer:
                 answ = answ.split()
                 if len(answ) > 2:
@@ -29,7 +29,7 @@ class Client:
                     result[answ[0]].append((int(answ[2]), float(answ[1])))              
             return result
         except:
-            raise ClientError
+            raise ClientError()
 
     def put(self, key, value, timestamp=datetime.datetime.now().timestamp()):
         self.timestamp = timestamp  # or datetime.datetime.now().timestamp()
@@ -37,7 +37,7 @@ class Client:
             data_send = f"put {key} {value} {self.timestamp}\n"
             self.sock.sendall(data_send.encode("utf-8"))
             if self.sock.recv(1024) == "error\nwrong command\n\n":
-                raise ClientError("put")
+                raise ClientError()
         except:
             raise ClientError
 
@@ -50,9 +50,8 @@ class Client:
                 raise ClientError()
             return self.parse_get(self.sock.recv(1024))
         except:
-            raise ClientError
+            raise ClientError()
 
 
 class ClientError(Exception):
-    def __init__(self, *args):
-        self.method = ""
+    pass
