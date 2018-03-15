@@ -5,12 +5,14 @@ class ClientServerProtocol(asyncio.Protocol):
     def connection_made(self, transport):
         self.transport = transport
 
-    def process_data(self, data):
-        print(data)
-        return data
+    @staticmethod
+    def process_data(data):
+        commands = ("get", "put")
+        srv_response = data
+        return srv_response
 
     def data_received(self, data):
-        resp = self.process_data(data.decode())
+        resp = process_data(data.decode())
         self.transport.write(resp.encode())
 
 

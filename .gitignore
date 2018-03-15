@@ -1,5 +1,4 @@
 **/__pycache__/*
-__pycache__/*
+**/.vscode/*
 w5/multiproc/*
-w5/.vscode/*
 w5/metric/*
