@@ -2,17 +2,43 @@ import asyncio
 
 
 class ClientServerProtocol(asyncio.Protocol):
+    def __init__(self):
+        self.err_msg = "error\nwrong command\n\n"
+        self.ok_msg = "ok\n\n"
+        self.metric = {}
+
     def connection_made(self, transport):
         self.transport = transport
 
-    @staticmethod
-    def process_data(data):
+    def process_data(self, data):
         commands = ("get", "put")
-        srv_response = data
-        return srv_response
+        try:
+            if len(data.split()) > 2:
+                client_cmd, key, value, timestamp = data.split()
+            elif len(data.split()) > 4:
+                raise Exception
+            else:
+                client_cmd, key = data.split()
+        except:
+            return self.err_msg        
+        if client_cmd not in commands:
+            return self.err_msg
+        else:
+            if client_cmd == "put":
+                if key not in self.metric:
+                    self.metric[key] = []
+                self.metric[key].append((timestamp, value))
+            if client_cmd == "get":
+                if key == "*":
+                    return self.metric
+                else:
+                    return self.metric[key]
+            return self.ok_msg
 
     def data_received(self, data):
-        resp = process_data(data.decode())
+        print(data.decode())
+        resp = self.process_data(data.decode())
+        print(resp)
         self.transport.write(resp.encode())
 
 
