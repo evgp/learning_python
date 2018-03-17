@@ -1,11 +1,12 @@
 import asyncio
 
+metric={}
 
 class ClientServerProtocol(asyncio.Protocol):
     def __init__(self):
         self.err_msg = "error\nwrong command\n\n"
         self.ok_msg = "ok\n\n"
-        self.metric = {}
+        # self.metric = {}
 
     def connection_made(self, transport):
         self.transport = transport
@@ -25,15 +26,15 @@ class ClientServerProtocol(asyncio.Protocol):
             return self.err_msg
         else:
             if client_cmd == "put":
-                if key not in self.metric:
-                    self.metric[key] = []
-                self.metric[key].append((timestamp, value))
-                print(self.metric)
+                if key not in metric:
+                    metric[key] = []
+                metric[key].append((timestamp, value))
+                print(metric)
             if client_cmd == "get":
                 if key == "*":
-                    return self.metric
+                    return metric
                 else:
-                    return self.metric[key]
+                    return metric[key]
             return self.ok_msg
 
     def data_received(self, data):
