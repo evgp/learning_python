@@ -28,6 +28,7 @@ class ClientServerProtocol(asyncio.Protocol):
                 if key not in self.metric:
                     self.metric[key] = []
                 self.metric[key].append((timestamp, value))
+                print(self.metric)
             if client_cmd == "get":
                 if key == "*":
                     return self.metric
@@ -38,8 +39,18 @@ class ClientServerProtocol(asyncio.Protocol):
     def data_received(self, data):
         print(data.decode())
         resp = self.process_data(data.decode())
-        print(resp)
-        self.transport.write(resp.encode())
+        # print(resp)
+        if isinstance(resp, dict):
+            self.transport.write("ok\n".encode())
+            for keyr in resp:
+                for _ in resp[keyr]:
+                    timestamp, value = _
+                    self.transport.write(
+                       f"{keyr} {value} {timestamp}\n".encode() 
+                    )
+            self.transport.write(b'\n')
+        else:
+            self.transport.write(resp.encode())
 
 
 loop = asyncio.get_event_loop()
